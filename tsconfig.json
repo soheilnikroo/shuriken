@@ -1,0 +1,72 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "declaration": false,
+    "outDir": "./dist",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "importHelpers": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@packages/*": [
+        "packages/*"
+      ],
+      "@groot/*": [
+        "packages/groot/*"
+      ],
+      "@snapp-ui/*": [
+        "packages/snapp-ui/*"
+      ],
+      "@soroush/*": [
+        "packages/soroush/*"
+      ],
+      "@doczilla/*": [
+        "packages/doczilla/*"
+      ],
+      "@masih/*": [
+        "packages/masih/*"
+      ],
+      "@mohitban/*": [
+        "packages/mohitban/*"
+      ],
+      "@ciknight/*": [
+        "packages/ciknight/*"
+      ],
+      "@jarvis/*": [
+        "packages/jarvis/*"
+      ]
+    },
+    "isolatedModules": true
+  },
+  "include": [
+    "src/**/*",
+    "bin/**/*",
+    "packages/**/*",
+    "scripts/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
