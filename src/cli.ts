@@ -163,7 +163,7 @@ export class CLI {
       );
       updateBuilder = registerOptions(updateBuilder, [
         {
-          name: '--version',
+          name: '--to-version',
           description: 'Specific version to migrate to',
           defaultValue: undefined,
         },

@@ -24,11 +24,15 @@ export class MigrationManager {
       throw new Error(`Package ${packageName} not found`);
     }
 
-    const sortedMigrations = pkg.migrations?.sort((a, b) =>
+    if (!pkg.migrations || pkg.migrations.length === 0) {
+      return [];
+    }
+
+    const sortedMigrations = pkg.migrations.sort((a, b) =>
       semver.compare(a.targetVersion, b.targetVersion)
     );
 
-    const migrationPath = sortedMigrations?.filter(
+    const migrationPath = sortedMigrations.filter(
       migration =>
         semver.gt(migration.targetVersion, fromVersion) &&
         semver.lte(migration.targetVersion, toVersion)
@@ -50,56 +54,69 @@ export class MigrationManager {
   async migratePackage(
     packageName: string,
     fromVersion: string,
-    toVersion?: string
+    toVersion: string
   ): Promise<IMigrationResult> {
     const pkg = await this.packageManager.getPackage(packageName);
 
     if (!pkg) {
-      throw new Error(`Package ${packageName} not found`);
-    }
-
-    if (!fromVersion) {
-      const installedPackage = this.packageManager.getInstalledPackage(packageName);
-
-      if (!installedPackage) {
-        throw new Error(`Package ${packageName} is not installed`);
-      }
-
-      fromVersion = installedPackage.installedVersion;
-    }
-
-    const targetVersion = toVersion || pkg.metadata.version;
-
-    this.logger.info(`Migrating package ${packageName} from ${fromVersion} to ${targetVersion}`);
-
-    const migrationPath = await this.getMigrationPath(packageName, fromVersion, targetVersion);
-
-    if (migrationPath && migrationPath.length === 0) {
-      this.logger.info(`No migrations needed for package ${packageName}`);
       return {
-        success: true,
+        success: false,
         fromVersion,
-        toVersion: targetVersion,
+        toVersion,
+        error: new Error(`Package ${packageName} not found`),
         completedMigrations: [],
       };
     }
 
-    const completedMigrations: string[] = [];
-
-    try {
-      if (migrationPath && migrationPath.length !== 0) {
-        for (const migration of migrationPath) {
-          await this.executeMigration(migration, {});
-          completedMigrations.push(migration.targetVersion);
-        }
-      }
-
-      this.packageManager.updateInstalledPackage(packageName, targetVersion);
-
+    // Check if we're already at the target version
+    if (fromVersion === toVersion) {
+      this.logger.info(`Package ${packageName} is already at version ${toVersion}`);
       return {
         success: true,
         fromVersion,
-        toVersion: targetVersion,
+        toVersion,
+        completedMigrations: [],
+      };
+    }
+
+    this.logger.info(`Migrating package ${packageName} from ${fromVersion} to ${toVersion}`);
+
+    const migrationPath = await this.getMigrationPath(packageName, fromVersion, toVersion);
+
+    if (!migrationPath || migrationPath.length === 0) {
+      this.logger.info(`No migrations needed for package ${packageName}`);
+      return {
+        success: true,
+        fromVersion,
+        toVersion,
+        completedMigrations: [],
+      };
+    }
+
+    this.logger.info(`Found ${migrationPath.length} migration(s) to execute`);
+
+    const completedMigrations: string[] = [];
+
+    try {
+      for (const migration of migrationPath) {
+        this.logger.info(`Starting migration to version ${migration.targetVersion}`);
+        
+        await this.executeMigration(migration, {
+          packageName,
+          fromVersion,
+          toVersion,
+          currentMigrationVersion: migration.targetVersion,
+        });
+        
+        completedMigrations.push(migration.targetVersion);
+        this.logger.success(`Migration to version ${migration.targetVersion} completed`);
+      }
+
+      this.logger.success(`All migrations completed successfully`);
+      return {
+        success: true,
+        fromVersion,
+        toVersion,
         completedMigrations,
       };
     } catch (error) {
@@ -108,7 +125,7 @@ export class MigrationManager {
       return {
         success: false,
         fromVersion,
-        toVersion: targetVersion,
+        toVersion,
         error: error as Error,
         completedMigrations,
       };
