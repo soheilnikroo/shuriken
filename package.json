@@ -1,5 +1,5 @@
 {
-  "name": "shuriken",
+  "name": "shuriken-cli",
   "version": "2.0.1",
   "description": "CLI tool manager for company packages",
   "main": "dist/index.js",
