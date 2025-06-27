@@ -6,6 +6,10 @@
   "bin": {
     "shuriken": "./dist/bin/shuriken.js"
   },
+  "publishConfig": {
+    "registry": "https://www.npmjs.com/package/shuriken-cli"
+  },
+  "repository": "https://github.com/soheilnikroo/shuriken",
   "scripts": {
     "clean": "rimraf dist",
     "build:packages": "rollup -c --bundleConfigAsCjs --environment BUILD_TARGET:packages",
